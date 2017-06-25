@@ -37,9 +37,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     // FORM
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .anyRequest()
-                .authenticated()
+        http.csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/**").permitAll()
+                //.anyRequest().permitAll()
+                //.authenticated()
                 .and()
                 .formLogin();
     }

@@ -1,7 +1,9 @@
 package com.commerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -15,6 +17,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@ToString
 public class User {
 
     @Id
@@ -29,6 +32,7 @@ public class User {
 
     private String name;
 
+    @Column(unique=true)
     private String username;
 
     private String password;
@@ -39,11 +43,17 @@ public class User {
 
     private String createdBy;
 
+
+    @Column(insertable = true,updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
     private String updatedBy;
 
+    @Column(insertable = true,updatable = true)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedDate;
+
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "user_authority",
