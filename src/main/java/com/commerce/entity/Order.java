@@ -2,6 +2,7 @@ package com.commerce.entity;
 
 import com.commerce.enumeration.OrderStatus;
 import com.commerce.enumeration.PayMethod;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -36,7 +37,8 @@ public class Order {
     @OneToMany(mappedBy="order")
     private Set<OrderProduct> orderProducts;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JsonIgnore
     private User user;
 
     private String recipientName;

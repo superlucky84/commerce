@@ -27,8 +27,10 @@ public class User {
     @OneToOne(mappedBy="user")
     private Cart cart;
 
-    @OneToMany(mappedBy="user")
+    /*
+    @OneToMany(mappedBy="user", fetch=FetchType.EAGER)
     private Set<Order> orders = new HashSet<Order>();
+    */
 
     private String name;
 
@@ -44,22 +46,21 @@ public class User {
     private String createdBy;
 
 
-    @Column(insertable = true,updatable = false)
+    @Column(updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
     private String updatedBy;
 
-    @Column(insertable = true,updatable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedDate;
 
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_authority",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "authority_id"))
-    private List<Authority> authoritys;
+    private List<Authority> authorities;
 
 
 }

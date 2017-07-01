@@ -14,4 +14,5 @@ public class ResponseVo {
 
     private String resultcode;
     private String message;
+
 }

@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Created by jinwoo on 2017. 6. 22..
  */
-@Controller
+@RestController
 @Log4j
 public class UserController {
 
@@ -22,7 +22,7 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
-    @RequestMapping(value="/join", method= RequestMethod.POST)
+    @RequestMapping(value="/api/join", method= RequestMethod.POST)
     @ResponseBody
     public User join(@RequestBody User user, Model model) {
 
@@ -37,13 +37,25 @@ public class UserController {
         return resultUser;
     }
 
+    @RequestMapping("/admin")
+    public Map<String, String> admin() {
+        Map<String, String> result = new HashMap<>();
+        result.put("message", "This is admin");
+        return result;
+    }
+
+    @RequestMapping("/api")
+    public Map<String, String> api() {
+        Map<String, String> result = new HashMap<>();
+        result.put("message", "This is api home");
+        return result;
+    }
+
     @RequestMapping(value="/logina", method=RequestMethod.POST)
     @ResponseBody
     public ResponseVo login(@RequestBody String username, @RequestBody String password, Model model) {
 
-
         ResponseVo responseVo = new ResponseVo();
-
         try {
             User findUser = userRepository.findByUsernameAndPassword(username, password);
             responseVo.setResultcode("100");
@@ -62,7 +74,7 @@ public class UserController {
 
     @RequestMapping(value="/logouta")
     public String logout(Model model) {
-
         return "test";
     }
+
 }

@@ -1,7 +1,10 @@
 package com.commerce.entity;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.dom4j.tree.AbstractEntity;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,7 +17,8 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-public class Authority {
+@EqualsAndHashCode(callSuper = false)
+public class Authority extends AbstractEntity implements GrantedAuthority {
 
     @Id
     @GeneratedValue

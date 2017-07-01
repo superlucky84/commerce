@@ -6,8 +6,10 @@ package com.commerce.entity;
 public class CartProductTest {
 
 
+  /*
   public void test() {
     CartProduct.Id id = new CartProduct.Id(1L, 1L);
 
   }
+  */
 }
