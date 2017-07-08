@@ -1,8 +1,9 @@
 package com.commerce.entity;
 
+
 import lombok.EqualsAndHashCode;
-import lombok.Generated;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -43,7 +44,7 @@ public class OrderProduct {
     @Getter
     @Setter
     @EqualsAndHashCode
-    @Generated
+    @NoArgsConstructor
     public static class Id implements Serializable {
 
         private Long orderId;

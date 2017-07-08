@@ -81,10 +81,11 @@ public class WebSecurityConfig {
     public static class ApiWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
         protected void configure(HttpSecurity http) throws Exception {
             http
+                .csrf().disable()
                 .antMatcher("/api/**")
                 .authorizeRequests()
-                //.anyRequest().hasAuthority("USER")
-                .anyRequest().permitAll()
+                .anyRequest().hasAuthority("USER")
+                //.anyRequest().permitAll()
                 .and()
                 .httpBasic();
         }
@@ -96,6 +97,7 @@ public class WebSecurityConfig {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
+                .csrf().disable()
                 .authorizeRequests()
                 .anyRequest().authenticated()
                 .and()

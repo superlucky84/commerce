@@ -17,7 +17,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@ToString
+@Table(name = "ordertable")
 public class Order {
 
     @Id
@@ -34,11 +34,10 @@ public class Order {
 
     private String deliveryAddress;
 
-    @OneToMany(mappedBy="order")
+    @OneToMany(mappedBy="order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderProduct> orderProducts;
 
     @ManyToOne(fetch=FetchType.EAGER)
-    @JsonIgnore
     private User user;
 
     private String recipientName;

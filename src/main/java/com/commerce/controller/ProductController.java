@@ -29,7 +29,7 @@ public class ProductController {
 
     @RequestMapping(value="/api/product", method= RequestMethod.GET)
     @ResponseBody
-    public ProductListVo join(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pagesize , Model model) {
+    public ProductListVo list(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pagesize , Model model) {
 
 
         ProductListVo productListVo = new ProductListVo();
@@ -48,7 +48,7 @@ public class ProductController {
 
     @RequestMapping(value="/api/product/{id}", method= RequestMethod.GET)
     @ResponseBody
-    public ProductVo join(@PathVariable Long id , Model model) {
+    public ProductVo get(@PathVariable Long id , Model model) {
       ProductVo productVo = new ProductVo();
 
       Product product = productRepository.findOne(id);

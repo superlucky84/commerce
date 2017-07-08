@@ -1,3 +1,5 @@
+
+
 INSERT INTO user (id, username, password) VALUES (-1, 'admin', '111111');
 INSERT INTO user (id, username, password) VALUES (-2, 'user', '111111');
 INSERT INTO authority (id, authority) VALUES (1, 'ADMIN');
@@ -37,3 +39,10 @@ insert into product(color,  created_by,  created_date,  description,  image_file
 insert into product(color,  created_by,  created_date,  description,  image_file_name,  name,  price) value('red', null,null,'discription', 'image_file_title', 'name31', 3000);
 insert into product(color,  created_by,  created_date,  description,  image_file_name,  name,  price) value('red', null,null,'discription', 'image_file_title', 'name32', 3000);
 insert into product(color,  created_by,  created_date,  description,  image_file_name,  name,  price) value('red', null,null,'discription', 'image_file_title', 'name33', 3000);
+
+insert into cart(user_id) values (-2);
+
+insert into cart_product (buy_count, cart_id, product_id) values (3,1,1);
+insert into cart_product (buy_count, cart_id, product_id) values (3,1,2);
+insert into cart_product (buy_count, cart_id, product_id) values (3,1,3);
+

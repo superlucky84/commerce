@@ -17,20 +17,18 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "orders")
 public class User {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @OneToOne(mappedBy="user")
+    @OneToOne(mappedBy="user",cascade = CascadeType.ALL)
     private Cart cart;
 
-    /*
-    @OneToMany(mappedBy="user", fetch=FetchType.EAGER)
+    @OneToMany(mappedBy="user",cascade = CascadeType.ALL, fetch=FetchType.LAZY)
     private Set<Order> orders = new HashSet<Order>();
-    */
 
     private String name;
 
