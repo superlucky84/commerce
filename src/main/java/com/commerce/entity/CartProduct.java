@@ -1,9 +1,12 @@
 package com.commerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,6 +18,7 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class CartProduct {
 
 
@@ -24,24 +28,26 @@ public class CartProduct {
 
     @ManyToOne
     @MapsId("cartId")
+    @JsonIgnore
     private Cart cart;
 
     @ManyToOne
     @MapsId("productId")
+    @JsonIgnore
     private Product product;
 
     private Long buyCount;
 
     @CreatedBy
-    private String createdBy;
+    private Long createdBy;
 
     @CreatedDate
     private Date createdDate;
 
-    @CreatedDate
-    private String updatedBy;
-
     @LastModifiedBy
+    private Long updatedBy;
+
+    @LastModifiedDate
     private Date updatedDate;
 
     @Getter

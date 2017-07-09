@@ -13,7 +13,7 @@ import com.commerce.vo.ResponseVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +37,37 @@ public class OrderController {
   @Autowired
   ProductRepository productRepository;
 
+  @RequestMapping(value="/api/order", method= RequestMethod.GET)
+  @ResponseBody
+  public OrderListVo orderList(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pagesize , Model model) {
+
+    OrderListVo orderListVo = new OrderListVo();
+
+    try {
+
+      AuditorAware<Long> auditorProvider = jpaAuditConfig.auditorProvider();
+      User user = userRepository.getOne(auditorProvider.getCurrentAuditor());
+
+      Pageable pageable = new PageRequest(page - 1, pagesize, Sort.Direction.DESC, "id");
+
+      Page<Order> orderPage = orderRepository.findByUser(user, pageable);
+
+      orderListVo.setFullListSize(orderPage.getTotalPages());
+      orderListVo.setPage(page);
+      orderListVo.setOrderList(orderPage.getContent());
+      orderListVo.setPageSize(pagesize);
+      orderListVo.setResultcode("200");
+
+    }
+    catch (Exception e) {
+      orderListVo.setResultcode("400");
+      orderListVo.setMessage(e.getMessage());
+    }
+
+    return orderListVo;
+
+  }
+
 
   @RequestMapping(value="/api/order/{id}/cancel", method= RequestMethod.POST)
   @ResponseBody
@@ -44,10 +75,15 @@ public class OrderController {
 
 
     ResponseVo responseVo = new ResponseVo();
-    responseVo.setResultcode("200");
 
-    orderRepository.delete(id);
-
+    try {
+      responseVo.setResultcode("200");
+      orderRepository.delete(id);
+    }
+    catch (Exception e) {
+      responseVo.setResultcode("400");
+      responseVo.setMessage(e.getMessage());
+    }
 
     return responseVo;
   }
@@ -57,45 +93,49 @@ public class OrderController {
   public ResponseVo orderSave(@RequestBody SaveOrderVo saveOrderVo , Model model) {
     ResponseVo responseVo = new ResponseVo();
 
+
     AuditorAware<Long> auditorProvider = jpaAuditConfig.auditorProvider();
     User user = userRepository.getOne(auditorProvider.getCurrentAuditor());
 
+    try {
 
-    // 배송받을 사람
-    Order order = new Order();
+      // 배송받을 사람
+      Order order = new Order();
 
-    order.setRecipientName(saveOrderVo.recipientName);
-    order.setDeliveryAddress(saveOrderVo.deliveryAddress);
-    order.setRecipientTel(saveOrderVo.recipientTel);
-    order.setPayMethod(saveOrderVo.payMethod);
-    order.setOrderPrice(saveOrderVo.orderPrice);
+      order.setRecipientName(saveOrderVo.recipientName);
+      order.setDeliveryAddress(saveOrderVo.deliveryAddress);
+      order.setRecipientTel(saveOrderVo.recipientTel);
+      order.setPayMethod(saveOrderVo.payMethod);
+      order.setOrderPrice(saveOrderVo.orderPrice);
 
-    List<HashMap<String, Long>> orderProductsList = saveOrderVo.orderList;
+      List<HashMap<String, Long>> orderProductsList = saveOrderVo.orderList;
 
-    Set<OrderProduct> orderProducts = new HashSet<>();
+      Set<OrderProduct> orderProducts = new HashSet<>();
 
-    for (HashMap<String, Long> orderProductInfo :orderProductsList) {
+      for (HashMap<String, Long> orderProductInfo :orderProductsList) {
 
-      OrderProduct orderProduct = new OrderProduct();
+        OrderProduct orderProduct = new OrderProduct();
 
-      Long productId = orderProductInfo.get("product");
-      Integer orderCount = Math.toIntExact(orderProductInfo.get("orderCount"));
+        Long productId = orderProductInfo.get("product");
+        Integer orderCount = Math.toIntExact(orderProductInfo.get("orderCount"));
 
+        Product product = productRepository.getOne(productId);
+        orderProduct.setProduct(product);
+        orderProduct.setOrder(order);
+        orderProduct.setOrderCount(orderCount);
+        orderProducts.add(orderProduct);
+      }
 
-      Product product = productRepository.getOne(productId);
-      orderProduct.setProduct(product);
-      orderProduct.setOrder(order);
-      orderProduct.setOrderCount(orderCount);
-      orderProducts.add(orderProduct);
-
+      order.setOrderProducts(orderProducts);
+      order.setUser(user);
+      orderRepository.save(order);
+      responseVo.setResultcode("200");
 
     }
-    order.setOrderProducts(orderProducts);
-    order.setUser(user);
-
-    orderRepository.save(order);
-
-    responseVo.setResultcode("200");
+    catch (Exception e) {
+      responseVo.setResultcode("400");
+      responseVo.setMessage(e.getMessage());
+    }
 
     return responseVo;
 
@@ -123,27 +163,24 @@ public class OrderController {
 
   @Getter
   @Setter
+  public static class OrderListVo extends ResponseVo {
+
+    private Integer page;
+    private Integer pageSize;
+    private Integer fullListSize;
+    private List<Order> orderList;
+
+  }
+
+  @Getter
+  @Setter
   public static class SaveOrderVo {
 
-    // 배송받을 사람
     private String recipientName;
-
-    // 배송지 주소
     private String deliveryAddress;
-
-    // 배송지 전화번호
     private String recipientTel;
-
-    // 결제수단
     private PayMethod payMethod;
-
-    // 결제금액
     private Double orderPrice;
-
-    // 주문상품목록
     private List<HashMap<String,Long>> orderList;
-
-
-
   }
 }

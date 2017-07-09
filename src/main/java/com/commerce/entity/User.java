@@ -1,9 +1,15 @@
 package com.commerce.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -18,6 +24,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString(exclude = "orders")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -25,9 +32,11 @@ public class User {
     private Long id;
 
     @OneToOne(mappedBy="user",cascade = CascadeType.ALL)
+    @JsonIgnore
     private Cart cart;
 
     @OneToMany(mappedBy="user",cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @JsonIgnore
     private Set<Order> orders = new HashSet<Order>();
 
     private String name;
@@ -41,16 +50,16 @@ public class User {
 
     private String mobile;
 
-    private String createdBy;
+    @CreatedBy
+    private Long createdBy;
 
-
-    @Column(updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
     private Date createdDate;
 
-    private String updatedBy;
+    @LastModifiedBy
+    private Long updatedBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
     private Date updatedDate;
 
 

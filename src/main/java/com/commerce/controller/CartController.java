@@ -45,36 +45,43 @@ public class CartController {
   @ResponseBody
   public ResponseVo delete(@PathVariable("id") Long id, Model model) {
 
-    AuditorAware<Long> auditorProvider = jpaAuditConfig.auditorProvider();
-    User user = userRepository.getOne(auditorProvider.getCurrentAuditor());
-
-    Cart cart = user.getCart();
-    Set<CartProduct> cartProducts = cart.getCartProducts();
-
-    Iterator<CartProduct> cartProductIterator = cartProducts.iterator();
-
-    for (Iterator<CartProduct> it = cartProductIterator; it.hasNext(); ) {
-
-      CartProduct cartProduct = it.next();
-
-      Long productId = cartProduct.getProduct().getId();
-
-      if (productId == id) {
-        System.out.println("-------"+id);
-        cartProducts.remove(cartProduct);
-        break;
-        //CartProduct deleteCartP = cartProductRepository.getOne(cartProduct.getId());
-        //System.out.println("JINWOO"+deleteCartP.getProduct().getId());
-        //cartProductRepository.delete(deleteCartP);
-      }
-    }
-    //cartProductRepository.delete(deleteCartProduct);
-
-    cartRepository.save(cart);
-
     ResponseVo responseVo = new ResponseVo();
-    responseVo.setResultcode("200");
 
+    try {
+
+      AuditorAware<Long> auditorProvider = jpaAuditConfig.auditorProvider();
+      User user = userRepository.getOne(auditorProvider.getCurrentAuditor());
+
+      Cart cart = user.getCart();
+      Set<CartProduct> cartProducts = cart.getCartProducts();
+
+      Iterator<CartProduct> cartProductIterator = cartProducts.iterator();
+
+      for (Iterator<CartProduct> it = cartProductIterator; it.hasNext(); ) {
+
+        CartProduct cartProduct = it.next();
+
+        Long productId = cartProduct.getProduct().getId();
+
+        if (productId == id) {
+          System.out.println("-------"+id);
+          cartProducts.remove(cartProduct);
+          break;
+          //CartProduct deleteCartP = cartProductRepository.getOne(cartProduct.getId());
+          //System.out.println("JINWOO"+deleteCartP.getProduct().getId());
+          //cartProductRepository.delete(deleteCartP);
+        }
+      }
+      //cartProductRepository.delete(deleteCartProduct);
+
+      cartRepository.save(cart);
+
+      responseVo.setResultcode("200");
+    }
+    catch (Exception e) {
+      responseVo.setResultcode("400");
+      responseVo.setMessage(e.getMessage());
+    }
 
     return responseVo;
   }
@@ -85,67 +92,99 @@ public class CartController {
   public CartListVo list(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pagesize , Model model) {
     CartListVo cartListVo = new CartListVo();
 
-    AuditorAware<Long> auditorProvider = jpaAuditConfig.auditorProvider();
-    User user = userRepository.getOne(auditorProvider.getCurrentAuditor());
-    Cart cart = user.getCart();
+    try {
 
-    Pageable pageable = new PageRequest(page - 1, pagesize, Sort.Direction.DESC, "id");
+      AuditorAware<Long> auditorProvider = jpaAuditConfig.auditorProvider();
+      User user = userRepository.getOne(auditorProvider.getCurrentAuditor());
+      Cart cart = user.getCart();
 
+      Pageable pageable = new PageRequest(page - 1, pagesize, Sort.Direction.DESC, "id");
 
-    Page<CartProduct> cartProducts = cartProductRepository.findByCart(cart, pageable);
-    cartListVo.setResultcode("200");
-    cartListVo.setFullListSize(cartProducts.getTotalPages());
-    cartListVo.setPage(page);
+      Page<CartProduct> cartProducts = cartProductRepository.findByCart(cart, pageable);
+      cartListVo.setResultcode("200");
+      cartListVo.setFullListSize(cartProducts.getTotalPages());
+      cartListVo.setPage(page);
 
-    List<CartVo> cartVos = new ArrayList<>();
-    for (CartProduct cartProduct: cartProducts) {
-      CartVo cartVo = new CartVo();
-      Product product = cartProduct.getProduct();
+      List<CartVo> cartVos = new ArrayList<>();
+      for (CartProduct cartProduct: cartProducts) {
+        CartVo cartVo = new CartVo();
+        Product product = cartProduct.getProduct();
 
-      cartVo.setId(product.getId());
-      cartVo.setColor(product.getColor());
-      cartVo.setDescription(product.getDescription());
-      cartVo.setImageUrl(product.getImageFileName());
-      cartVo.setName(product.getName());
-      cartVo.setPrice(product.getPrice());
-      cartVo.setBuyCount(cartProduct.getBuyCount());
-      cartVos.add(cartVo);
+        cartVo.setId(product.getId());
+        cartVo.setColor(product.getColor());
+        cartVo.setDescription(product.getDescription());
+        cartVo.setImageUrl(product.getImageFileName());
+        cartVo.setName(product.getName());
+        cartVo.setPrice(product.getPrice());
+        cartVo.setBuyCount(cartProduct.getBuyCount());
+        cartVos.add(cartVo);
+      }
+      cartListVo.setList(cartVos);
+
     }
-    cartListVo.setList(cartVos);
+    catch (Exception e) {
+      cartListVo.setResultcode("400");
+      cartListVo.setMessage(e.getMessage());
+    }
+
 
     return cartListVo;
+
   }
 
   @RequestMapping(value="/api/cart", method= RequestMethod.POST)
   @ResponseBody
   public ResponseVo cartSave(@RequestBody HashMap<String, Long> requestBody , Model model) {
 
-    Long id = requestBody.get("id");
-    Long buyCount = requestBody.get("buyCount");
-
-
     ResponseVo responseVo = new ResponseVo();
 
-    AuditorAware<Long> auditorProvider = jpaAuditConfig.auditorProvider();
+    try {
 
-    User user = userRepository.getOne(auditorProvider.getCurrentAuditor());
+      Long id = requestBody.get("id");
+      Long buyCount = requestBody.get("buyCount");
 
-    Cart cart = user.getCart();
+      AuditorAware<Long> auditorProvider = jpaAuditConfig.auditorProvider();
+      User user = userRepository.getOne(auditorProvider.getCurrentAuditor());
+      Cart cart = user.getCart();
 
-    if (cart == null) {
-      cart = new Cart();
-      cart.setUser(user);
-      user.setCart(cart);
+      if (cart == null) {
+        cart = new Cart();
+        cart.setUser(user);
+        user.setCart(cart);
+      }
+
+      Set<CartProduct> cartProducts =  cart.getCartProducts();
+      if (cartProducts == null) {
+        cartProducts = new HashSet<CartProduct>();
+        cart.setCartProducts(cartProducts);
+      }
+
+      boolean addcartProductsChk = true;
+      addcartProductsChk = cartProductChkAndUpdate(cartProducts, id, buyCount);
+
+      if (addcartProductsChk) {
+        CartProduct cartProduct = new CartProduct();
+        Product product = productRepository.getOne(id);
+
+        cartProduct.setCart(cart);
+        cartProduct.setProduct(product);
+        cartProduct.setBuyCount(buyCount);
+        cartProducts.add(cartProduct);
+      }
+      userRepository.save(user);
+      responseVo.setResultcode("200");
     }
-    
-    Set<CartProduct> cartProducts =  cart.getCartProducts();
-    if (cartProducts == null) {
-      cartProducts = new HashSet<CartProduct>();
-      cart.setCartProducts(cartProducts);
+    catch (Exception e) {
+      responseVo.setResultcode("400");
+      responseVo.setMessage(e.getMessage());
     }
 
-    boolean addInsert = true;
+    return responseVo;
+  }
 
+  public Boolean cartProductChkAndUpdate(Set<CartProduct> cartProducts, Long id, Long buyCount) {
+
+    Boolean addcartProductsChk = true;
     if (cartProducts.size()>0) {
 
       Iterator<CartProduct> cartIterator = cartProducts.iterator();
@@ -158,26 +197,12 @@ public class CartController {
         Long origBuyCount = cartProduct.getBuyCount();
 
         if (productId == id) {
-          addInsert = false;
+          addcartProductsChk = false;
           cartProduct.setBuyCount(origBuyCount+buyCount);
         }
       }
     }
-
-    if (addInsert) {
-      CartProduct cartProduct = new CartProduct();
-
-      Product product = productRepository.getOne(id);
-
-      cartProduct.setCart(cart);
-      cartProduct.setProduct(product);
-      cartProduct.setBuyCount(buyCount);
-      cartProducts.add(cartProduct);
-    }
-    userRepository.save(user);
-    responseVo.setResultcode("200");
-
-    return responseVo;
+    return addcartProductsChk;
 
   }
 

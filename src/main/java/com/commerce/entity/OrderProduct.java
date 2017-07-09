@@ -1,10 +1,16 @@
 package com.commerce.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -16,6 +22,7 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class OrderProduct {
 
     @EmbeddedId
@@ -23,6 +30,7 @@ public class OrderProduct {
 
     @ManyToOne
     @MapsId("orderId")
+    @JsonIgnore
     private Order order;
 
     @ManyToOne
@@ -31,12 +39,16 @@ public class OrderProduct {
 
     private Integer orderCount;
 
-    private String createdBy;
+    @CreatedBy
+    private Long createdBy;
 
+    @CreatedDate
     private Date createdDate;
 
-    private String updatedBy;
+    @LastModifiedBy
+    private Long updatedBy;
 
+    @LastModifiedDate
     private Date updatedDate;
 
 
